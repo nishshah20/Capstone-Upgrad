@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: upg-loadme-external
+  namespace: demo
+  labels:
+    app: upg-loadme
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/target-type: instace
+    alb.ingress.kubernetes.io/subnets: subnet-0156b2406639efa6c, subnet-00d44e57a9dd60e76
+    alb.ingress.kubernetes.io/scheme: internet-facing
+spec:
+  ingressClassName: alb
+  rules:
+  - http:
+      paths:
+        - path: /test
+          pathType: Prefix
+          backend:
+            service:
+              name: upg-loadme-service-lb
+              port:
+                number: 80

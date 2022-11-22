@@ -1,0 +1,10 @@
+metadata:
+  namespace: demo
+resources:
+  limits: 
+    cpu: "200m"
+    memory: "200Mi"
+auth:
+  enabled: false
+persistence:
+  path: /var/lib/redis

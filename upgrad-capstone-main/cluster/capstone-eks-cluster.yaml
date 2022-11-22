@@ -1,0 +1,107 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: 514-capstone-eks
+  region: us-east-1
+  version: "1.20"
+vpc:
+  id: "vpc-0805c4c3d0e342ba7"
+  subnets:
+    public:
+      eks-public-514-a:
+        id: "subnet-075f7ccc1cf16223e"
+        az: "us-east-1a"
+      eks-public-514-b:
+        id: "subnet-035f4da51b73e7760"
+        az: "us-east-1b"
+    private:
+      eks-private-514-a:
+        id: "subnet-08e65b959c632451b"
+        az: "us-east-1a"
+      eks-private-514-b:
+        id: "subnet-0ec106e95e9036f78"
+        az: "us-east-1b"
+  clusterEndpoints:
+    publicAccess:  true
+    privateAccess: true
+  nat:
+    gateway: Disable
+
+iam:
+  withOIDC: true
+  serviceAccounts:
+  - metadata:
+      name: aws-load-balancer-controller
+      namespace: kube-system
+    wellKnownPolicies:
+      awsLoadBalancerController: true
+  - metadata:
+      name: ebs-csi-controller-sa
+      namespace: kube-system
+    wellKnownPolicies:
+      ebsCSIController: true
+  - metadata:
+      name: efs-csi-controller-sa
+      namespace: kube-system
+    wellKnownPolicies:
+      efsCSIController: true
+  - metadata:
+      name: external-dns
+      namespace: kube-system
+    wellKnownPolicies:
+      externalDNS: true
+  - metadata:
+      name: cert-manager
+      namespace: cert-manager
+    wellKnownPolicies:
+      certManager: true
+  - metadata:
+      name: cluster-autoscaler
+      namespace: kube-system
+      labels: {aws-usage: "cluster-ops"}
+    wellKnownPolicies:
+      autoScaler: true
+
+nodeGroups:
+  - name: private-514-ng-1
+    labels: { role: workers }
+    tags:
+      k8s.io/cluster-autoscaler/enabled: "true"
+      k8s.io/cluster-autoscaler/my-eks-514: "shared"
+    instancesDistribution:
+      instanceTypes:
+        - t2.medium
+    desiredCapacity: 1
+    minSize: 0
+    maxSize: 3
+    privateNetworking: true
+    subnets:
+      - eks-private-514-a
+  - name: public-514-ng-1
+    labels: { role: workers }
+    tags:
+      k8s.io/cluster-autoscaler/enabled: "true"
+      k8s.io/cluster-autoscaler/my-eks-514: "shared"
+    instancesDistribution:
+      instanceTypes:
+        - t2.medium
+    desiredCapacity: 0
+    minSize: 0
+    maxSize: 1
+    subnets:
+      - eks-public-514-a
+  - name: upg-loadme
+    labels: { role: workers }
+    instancesDistribution:
+      instanceTypes:
+        - t2.medium
+    desiredCapacity: 1
+    minSize: 0
+    maxSize: 5
+    privateNetworking: true
+    taints:
+      - key: "capstone"
+        value: "true"
+        effect: NoSchedule
+    subnets:
+      - eks-private-514-a

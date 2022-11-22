@@ -1,0 +1,8 @@
+# redis
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm install my-release bitnami/redis -f redis.yaml
+
+kubectl run redis-cli --image redis:latest -n demo
+kubectl exec -it redis-cli /bin/bash -n demo
+
+redis-cli -h redis-cli -p 6379

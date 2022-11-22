@@ -1,0 +1,42 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: upg-loadme
+  namespace: demo
+  labels:
+    app: upg-loadme
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 3
+  selector:
+    matchLabels:
+      app: upg-loadme
+  template:
+    metadata:
+      name: upg-loadme
+      labels:
+        app: upg-loadme
+    spec:
+      containers:
+        - name: upg-loadme
+          image: '847038923881.dkr.ecr.us-east-1.amazonaws.com/514-nish-capstone-node-repo:latest'
+          resources:
+            requests:
+              cpu: 800m
+              memory: 400Mi
+            limits:
+              cpu: 1000m
+              memory: 400Mi
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 10
+      dnsPolicy: ClusterFirst
+      tolerations:
+      - key: "capstone"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
